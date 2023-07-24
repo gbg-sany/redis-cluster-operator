@@ -1,6 +1,6 @@
 module github.com/ucloud/redis-cluster-operator
 
-go 1.18
+go 1.19
 
 require (
 	github.com/appscode/go v0.0.0-20200323182826-54e98e09185a

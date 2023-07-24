@@ -1,4 +1,4 @@
-FROM golang:1.18 as builder
+FROM golang:1.19 as builder
 
 ARG PROJECT_NAME=redis-cluster-operator
 ARG BUILD_PATH=./cmd/manager/main.go
