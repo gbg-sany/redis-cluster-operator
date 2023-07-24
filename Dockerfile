@@ -1,7 +1,7 @@
 FROM golang:1.18 as builder
 
 ARG PROJECT_NAME=redis-cluster-operator
-ARG BUILD_PATH=./cmd/manager
+ARG BUILD_PATH=./cmd/manager/main.go
 
 
 WORKDIR /src
