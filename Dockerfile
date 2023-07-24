@@ -20,7 +20,5 @@ COPY --from=builder /src/output/redis-cluster-operator .
 
 ARG PROJECT_NAME=redis-cluster-operator
 
-RUN adduser -D ${PROJECT_NAME}
-USER ${PROJECT_NAME}
-
 ENTRYPOINT ["/redis-cluster-operator"]
+USER 65532:65532
