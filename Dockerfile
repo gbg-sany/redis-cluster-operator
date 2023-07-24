@@ -1,35 +1,26 @@
-FROM golang:1.13.3-alpine as go-builder
-
-RUN apk update && apk upgrade && \
-    apk add --no-cache ca-certificates git mercurial
+FROM golang:1.18 as builder
 
 ARG PROJECT_NAME=redis-cluster-operator
-ARG REPO_PATH=github.com/ucloud/$PROJECT_NAME
-ARG BUILD_PATH=${REPO_PATH}/cmd/manager
+ARG BUILD_PATH=./cmd/manager
 
-# Build version and commit should be passed in when performing docker build
-ARG VERSION=0.1.1
-ARG GIT_SHA=0000000
 
 WORKDIR /src
 
 COPY go.mod go.sum ./
 RUN go mod download
 
-COPY pkg ./ cmd ./ version ./
+COPY pkg ./ cmd ./ version ./ third_party ./
 
-RUN GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build -o ${GOBIN}/${PROJECT_NAME} \
-    -ldflags "-X ${REPO_PATH}/version.Version=${VERSION} -X ${REPO_PATH}/version.GitSHA=${GIT_SHA}" \
-    $BUILD_PATH
+RUN GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build -o output/${PROJECT_NAME} $BUILD_PATH
 
 # =============================================================================
-FROM alpine:3.9 AS final
+FROM gcr.io/distroless/static:debug
+WORKDIR /
+COPY --from=builder /src/output/redis-cluster-operator .
 
 ARG PROJECT_NAME=redis-cluster-operator
-
-COPY --from=go-builder ${GOBIN}/${PROJECT_NAME} /usr/local/bin/${PROJECT_NAME}
 
 RUN adduser -D ${PROJECT_NAME}
 USER ${PROJECT_NAME}
 
-ENTRYPOINT ["/usr/local/bin/redis-cluster-operator"]
+ENTRYPOINT ["/redis-cluster-operator"]
