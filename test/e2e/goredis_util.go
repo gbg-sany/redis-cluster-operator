@@ -1,10 +1,11 @@
 package e2e
 
 import (
+	"time"
+
 	"github.com/go-redis/redis"
 	uuid "github.com/satori/go.uuid"
 	"golang.org/x/sync/errgroup"
-	"time"
 )
 
 const defaultTimeOut = time.Second * 2
@@ -38,8 +39,12 @@ func (g *GoRedis) StuffingData(round, n int) error {
 	for i := 0; i < round; i++ {
 		group.Go(func() error {
 			for j := 0; j < n; j++ {
-				key := uuid.NewV4().String()
-				if err := g.client.Set(key, key, 0).Err(); err != nil {
+				id, err := uuid.NewV4()
+				if err != nil {
+					return err
+				}
+				key := id.String()
+				if err = g.client.Set(key, key, 0).Err(); err != nil {
 					return err
 				}
 			}

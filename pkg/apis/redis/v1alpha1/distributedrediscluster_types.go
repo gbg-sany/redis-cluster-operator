@@ -10,7 +10,6 @@ import (
 // NOTE: json tags are required.  Any new fields you add must have json tags for the fields to be serialized.
 
 // DistributedRedisClusterSpec defines the desired state of DistributedRedisCluster
-// +k8s:openapi-gen=true
 type DistributedRedisClusterSpec struct {
 	// INSERT ADDITIONAL SPEC FIELDS - desired state of cluster
 	// Important: Run "operator-sdk generate k8s" to regenerate code after modifying this file
@@ -25,18 +24,18 @@ type DistributedRedisClusterSpec struct {
 	ServiceName      string                        `json:"serviceName,omitempty"`
 	Config           map[string]string             `json:"config,omitempty"`
 	// Set RequiredAntiAffinity to force the master-slave node anti-affinity.
-	RequiredAntiAffinity 		bool                         `json:"requiredAntiAffinity,omitempty"`
-	Affinity             		*corev1.Affinity             `json:"affinity,omitempty"`
-	NodeSelector         		map[string]string            `json:"nodeSelector,omitempty"`
-	ToleRations          		[]corev1.Toleration          `json:"toleRations,omitempty"`
-	SecurityContext      		*corev1.PodSecurityContext   `json:"securityContext,omitempty"`
-	ContainerSecurityContext	*corev1.SecurityContext		 `json:"containerSecurityContext,omitempty"`
-	Annotations          		map[string]string            `json:"annotations,omitempty"`
-	Storage              		*RedisStorage                `json:"storage,omitempty"`
-	Resources            		*corev1.ResourceRequirements `json:"resources,omitempty"`
-	PasswordSecret       		*corev1.LocalObjectReference `json:"passwordSecret,omitempty"`
-	Monitor              		*AgentSpec                   `json:"monitor,omitempty"`
-	Init                 		*InitSpec                    `json:"init,omitempty"`
+	RequiredAntiAffinity     bool                         `json:"requiredAntiAffinity,omitempty"`
+	Affinity                 *corev1.Affinity             `json:"affinity,omitempty"`
+	NodeSelector             map[string]string            `json:"nodeSelector,omitempty"`
+	ToleRations              []corev1.Toleration          `json:"toleRations,omitempty"`
+	SecurityContext          *corev1.PodSecurityContext   `json:"securityContext,omitempty"`
+	ContainerSecurityContext *corev1.SecurityContext      `json:"containerSecurityContext,omitempty"`
+	Annotations              map[string]string            `json:"annotations,omitempty"`
+	Storage                  *RedisStorage                `json:"storage,omitempty"`
+	Resources                *corev1.ResourceRequirements `json:"resources,omitempty"`
+	PasswordSecret           *corev1.LocalObjectReference `json:"passwordSecret,omitempty"`
+	Monitor                  *AgentSpec                   `json:"monitor,omitempty"`
+	Init                     *InitSpec                    `json:"init,omitempty"`
 }
 
 type AgentSpec struct {
@@ -123,7 +122,7 @@ type DistributedRedisClusterStatus struct {
 
 type Restore struct {
 	Phase  RestorePhase        `json:"phase,omitempty"`
-	Backup *RedisClusterBackup `json:"backup, omitempty"`
+	Backup *RedisClusterBackup `json:"backup,omitempty"`
 }
 
 // RedisClusterNode represent a RedisCluster Node
@@ -139,12 +138,15 @@ type RedisClusterNode struct {
 	StatefulSet string    `json:"statefulSet"`
 }
 
+// +genclient
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
 
+// +kubebuilder:printcolumn:name="replicas",type=number,JSONPath=`.spec.clusterReplicas`
+// +kubebuilder:printcolumn:name="service",type=string,JSONPath=`.spec.serviceName`
+// +kubebuilder:printcolumn:name="Age",type="date",JSONPath=".metadata.creationTimestamp"
+// +kubebuilder:object:root=true
+// +kubebuilder:resource:scope=Namespaced, shortName={drc}, categories={all}
 // DistributedRedisCluster is the Schema for the distributedredisclusters API
-// +k8s:openapi-gen=true
-// +kubebuilder:subresource:status
-// +kubebuilder:resource:path=distributedredisclusters,scope=Namespaced
 type DistributedRedisCluster struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`

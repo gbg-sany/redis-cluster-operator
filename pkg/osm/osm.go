@@ -6,10 +6,10 @@ import (
 	"strconv"
 	"strings"
 
-	awsconst "kmodules.xyz/constants/aws"
-	azconst "kmodules.xyz/constants/azure"
-	googconst "kmodules.xyz/constants/google"
-	osconst "kmodules.xyz/constants/openstack"
+	awsconst "github.com/ucloud/redis-cluster-operator/third_party/kmodules.xyz/constants/aws"
+	azconst "github.com/ucloud/redis-cluster-operator/third_party/kmodules.xyz/constants/azure"
+	googconst "github.com/ucloud/redis-cluster-operator/third_party/kmodules.xyz/constants/google"
+	osconst "github.com/ucloud/redis-cluster-operator/third_party/kmodules.xyz/constants/openstack"
 
 	stringz "github.com/appscode/go/strings"
 	"github.com/appscode/go/types"

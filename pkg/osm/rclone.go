@@ -4,10 +4,10 @@ import (
 	"context"
 	"fmt"
 
+	awsconst "github.com/ucloud/redis-cluster-operator/third_party/kmodules.xyz/constants/aws"
 	core "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	ktypes "k8s.io/apimachinery/pkg/types"
-	awsconst "kmodules.xyz/constants/aws"
 	api "kmodules.xyz/objectstore-api/api/v1"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 )

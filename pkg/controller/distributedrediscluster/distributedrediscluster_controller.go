@@ -66,7 +66,7 @@ func Add(mgr manager.Manager) error {
 		Version: "v1",
 		Kind:    "Pod",
 	}
-	restClient, err := apiutil.RESTClientForGVK(gvk, mgr.GetConfig(), serializer.NewCodecFactory(scheme.Scheme))
+	restClient, err := apiutil.RESTClientForGVK(gvk, false, mgr.GetConfig(), serializer.NewCodecFactory(scheme.Scheme))
 	if err != nil {
 		return err
 	}
@@ -103,13 +103,13 @@ func add(mgr manager.Manager, r reconcile.Reconciler) error {
 	pred := predicate.Funcs{
 		UpdateFunc: func(e event.UpdateEvent) bool {
 			// returns false if DistributedRedisCluster is ignored (not managed) by this operator.
-			if !utils.ShoudManage(e.MetaNew) {
+			if !utils.ShoudManage(e.ObjectNew) {
 				return false
 			}
-			log.WithValues("namespace", e.MetaNew.GetNamespace(), "name", e.MetaNew.GetName()).V(5).Info("Call UpdateFunc")
+			log.WithValues("namespace", e.ObjectNew.GetNamespace(), "name", e.ObjectNew.GetName()).V(5).Info("Call UpdateFunc")
 			// Ignore updates to CR status in which case metadata.Generation does not change
-			if e.MetaOld.GetGeneration() != e.MetaNew.GetGeneration() {
-				log.WithValues("namespace", e.MetaNew.GetNamespace(), "name", e.MetaNew.GetName()).Info("Generation change return true",
+			if e.ObjectOld.GetGeneration() != e.ObjectNew.GetGeneration() {
+				log.WithValues("namespace", e.ObjectNew.GetNamespace(), "name", e.ObjectNew.GetName()).Info("Generation change return true",
 					"old", e.ObjectOld, "new", e.ObjectNew)
 				return true
 			}
@@ -117,19 +117,19 @@ func add(mgr manager.Manager, r reconcile.Reconciler) error {
 		},
 		DeleteFunc: func(e event.DeleteEvent) bool {
 			// returns false if DistributedRedisCluster is ignored (not managed) by this operator.
-			if !utils.ShoudManage(e.Meta) {
+			if !utils.ShoudManage(e.Object) {
 				return false
 			}
-			log.WithValues("namespace", e.Meta.GetNamespace(), "name", e.Meta.GetName()).Info("Call DeleteFunc")
+			log.WithValues("namespace", e.Object.GetNamespace(), "name", e.Object.GetName()).Info("Call DeleteFunc")
 			// Evaluates to false if the object has been confirmed deleted.
 			return !e.DeleteStateUnknown
 		},
 		CreateFunc: func(e event.CreateEvent) bool {
 			// returns false if DistributedRedisCluster is ignored (not managed) by this operator.
-			if !utils.ShoudManage(e.Meta) {
+			if !utils.ShoudManage(e.Object) {
 				return false
 			}
-			log.WithValues("namespace", e.Meta.GetNamespace(), "name", e.Meta.GetName()).Info("Call CreateFunc")
+			log.WithValues("namespace", e.Object.GetNamespace(), "name", e.Object.GetName()).Info("Call CreateFunc")
 			return true
 		},
 	}
@@ -167,7 +167,7 @@ type ReconcileDistributedRedisCluster struct {
 // Note:
 // The Controller will requeue the Request to be processed again if the returned error is non-nil or
 // Result.Requeue is true, otherwise upon completion it will remove the work from the queue.
-func (r *ReconcileDistributedRedisCluster) Reconcile(request reconcile.Request) (reconcile.Result, error) {
+func (r *ReconcileDistributedRedisCluster) Reconcile(ctx context.Context, request reconcile.Request) (reconcile.Result, error) {
 	reqLogger := log.WithValues("Request.Namespace", request.Namespace, "Request.Name", request.Name)
 	reqLogger.Info("Reconciling DistributedRedisCluster")
 
@@ -181,12 +181,12 @@ func (r *ReconcileDistributedRedisCluster) Reconcile(request reconcile.Request) 
 		return reconcile.Result{}, err
 	}
 
-	ctx := &syncContext{
+	syncCtx := &syncContext{
 		cluster:   instance,
 		reqLogger: reqLogger,
 	}
 
-	err = r.ensureCluster(ctx)
+	err = r.ensureCluster(syncCtx)
 	if err != nil {
 		switch GetType(err) {
 		case StopRetry:
@@ -206,15 +206,15 @@ func (r *ReconcileDistributedRedisCluster) Reconcile(request reconcile.Request) 
 		return reconcile.Result{}, Kubernetes.Wrap(err, "GetStatefulSetPods")
 	}
 
-	ctx.pods = clusterPods(redisClusterPods.Items)
-	reqLogger.V(6).Info("debug cluster pods", "", ctx.pods)
-	ctx.healer = clustermanger.NewHealer(&heal.CheckAndHeal{
+	syncCtx.pods = clusterPods(redisClusterPods.Items)
+	reqLogger.V(6).Info("debug cluster pods", "", syncCtx.pods)
+	syncCtx.healer = clustermanger.NewHealer(&heal.CheckAndHeal{
 		Logger:     reqLogger,
 		PodControl: k8sutil.NewPodController(r.client),
-		Pods:       ctx.pods,
+		Pods:       syncCtx.pods,
 		DryRun:     false,
 	})
-	err = r.waitPodReady(ctx)
+	err = r.waitPodReady(syncCtx)
 	if err != nil {
 		switch GetType(err) {
 		case Kubernetes:
@@ -232,7 +232,7 @@ func (r *ReconcileDistributedRedisCluster) Reconcile(request reconcile.Request) 
 		return reconcile.Result{}, Kubernetes.Wrap(err, "getClusterPassword")
 	}
 
-	admin, err := newRedisAdmin(ctx.pods, password, config.RedisConf(), reqLogger)
+	admin, err := newRedisAdmin(syncCtx.pods, password, config.RedisConf(), reqLogger)
 	if err != nil {
 		return reconcile.Result{}, Redis.Wrap(err, "newRedisAdmin")
 	}
@@ -245,7 +245,7 @@ func (r *ReconcileDistributedRedisCluster) Reconcile(request reconcile.Request) 
 		}
 	}
 
-	requeue, err := ctx.healer.Heal(instance, clusterInfos, admin)
+	requeue, err := syncCtx.healer.Heal(instance, clusterInfos, admin)
 	if err != nil {
 		return reconcile.Result{}, Redis.Wrap(err, "Heal")
 	}
@@ -253,9 +253,9 @@ func (r *ReconcileDistributedRedisCluster) Reconcile(request reconcile.Request) 
 		return reconcile.Result{RequeueAfter: requeueAfter}, nil
 	}
 
-	ctx.admin = admin
-	ctx.clusterInfos = clusterInfos
-	err = r.waitForClusterJoin(ctx)
+	syncCtx.admin = admin
+	syncCtx.clusterInfos = clusterInfos
+	err = r.waitForClusterJoin(syncCtx)
 	if err != nil {
 		switch GetType(err) {
 		case Requeue:
@@ -287,7 +287,7 @@ func (r *ReconcileDistributedRedisCluster) Reconcile(request reconcile.Request) 
 			statefulSetController: r.statefulSetController,
 			cluster:               instance,
 		}
-		if err := waiting(waiter, ctx.reqLogger); err != nil {
+		if err := waiting(waiter, syncCtx.reqLogger); err != nil {
 			return reconcile.Result{}, err
 		}
 		return reconcile.Result{Requeue: true}, nil
@@ -313,7 +313,7 @@ func (r *ReconcileDistributedRedisCluster) Reconcile(request reconcile.Request) 
 		return reconcile.Result{}, Redis.Wrap(err, "SetConfigIfNeed")
 	}
 
-	status := buildClusterStatus(clusterInfos, ctx.pods, instance, reqLogger)
+	status := buildClusterStatus(clusterInfos, syncCtx.pods, instance, reqLogger)
 	if is := r.isScalingDown(instance, reqLogger); is {
 		SetClusterRebalancing(status, "scaling down")
 	}
@@ -323,7 +323,7 @@ func (r *ReconcileDistributedRedisCluster) Reconcile(request reconcile.Request) 
 	instance.Status = *status
 	if needClusterOperation(instance, reqLogger) {
 		reqLogger.Info(">>>>>> clustering")
-		err = r.syncCluster(ctx)
+		err = r.syncCluster(syncCtx)
 		if err != nil {
 			newStatus := instance.Status.DeepCopy()
 			SetClusterFailed(newStatus, err.Error())
@@ -338,7 +338,7 @@ func (r *ReconcileDistributedRedisCluster) Reconcile(request reconcile.Request) 
 			return reconcile.Result{}, Redis.Wrap(err, "GetClusterInfos")
 		}
 	}
-	newStatus := buildClusterStatus(newClusterInfos, ctx.pods, instance, reqLogger)
+	newStatus := buildClusterStatus(newClusterInfos, syncCtx.pods, instance, reqLogger)
 	SetClusterOK(newStatus, "OK")
 	r.updateClusterIfNeed(instance, newStatus, reqLogger)
 	return reconcile.Result{RequeueAfter: time.Duration(reconcileTime) * time.Second}, nil

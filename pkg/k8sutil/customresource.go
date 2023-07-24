@@ -2,6 +2,7 @@ package k8sutil
 
 import (
 	"context"
+
 	"k8s.io/apimachinery/pkg/types"
 
 	"k8s.io/apimachinery/pkg/runtime"
@@ -30,11 +31,11 @@ func NewCRControl(client client.Client) ICustomResource {
 }
 
 func (c *clusterControl) UpdateCRStatus(obj runtime.Object) error {
-	return c.client.Status().Update(context.TODO(), obj)
+	return c.client.Status().Update(context.TODO(), obj.(client.Object))
 }
 
 func (c *clusterControl) UpdateCR(obj runtime.Object) error {
-	return c.client.Update(context.TODO(), obj)
+	return c.client.Update(context.TODO(), obj.(client.Object))
 }
 
 func (c *clusterControl) GetRedisClusterBackup(namespace, name string) (*redisv1alpha1.RedisClusterBackup, error) {

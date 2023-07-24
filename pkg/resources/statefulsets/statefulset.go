@@ -250,7 +250,7 @@ func redisServerContainer(cluster *redisv1alpha1.DistributedRedisCluster, passwo
 		LivenessProbe: &corev1.Probe{
 			InitialDelaySeconds: graceTime,
 			TimeoutSeconds:      5,
-			Handler: corev1.Handler{
+			ProbeHandler: corev1.ProbeHandler{
 				Exec: &corev1.ExecAction{
 					Command: []string{
 						"sh",
@@ -263,7 +263,7 @@ func redisServerContainer(cluster *redisv1alpha1.DistributedRedisCluster, passwo
 		ReadinessProbe: &corev1.Probe{
 			InitialDelaySeconds: graceTime,
 			TimeoutSeconds:      5,
-			Handler: corev1.Handler{
+			ProbeHandler: corev1.ProbeHandler{
 				Exec: &corev1.ExecAction{
 					Command: []string{
 						"sh",
@@ -286,12 +286,12 @@ func redisServerContainer(cluster *redisv1alpha1.DistributedRedisCluster, passwo
 		Resources: *cluster.Spec.Resources,
 		// TODO store redis data when pod stop
 		Lifecycle: &corev1.Lifecycle{
-			PostStart: &corev1.Handler{
+			PostStart: &corev1.LifecycleHandler{
 				Exec: &corev1.ExecAction{
 					Command: []string{"/bin/sh", "-c", "echo ${REDIS_PASSWORD} > /data/redis_password"},
 				},
 			},
-			PreStop: &corev1.Handler{
+			PreStop: &corev1.LifecycleHandler{
 				Exec: &corev1.ExecAction{
 					Command: []string{"/bin/sh", "/conf/shutdown.sh"},
 				},

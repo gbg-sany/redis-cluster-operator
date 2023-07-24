@@ -8,18 +8,13 @@ import (
 	"github.com/go-logr/logr"
 	"k8s.io/apimachinery/pkg/runtime"
 	utilvalidation "k8s.io/apimachinery/pkg/util/validation"
-	"k8s.io/apimachinery/pkg/util/validation/field"
-	"k8s.io/kubernetes/pkg/apis/core/v1/validation"
 	ctrl "sigs.k8s.io/controller-runtime"
 	logf "sigs.k8s.io/controller-runtime/pkg/log"
-	"sigs.k8s.io/controller-runtime/pkg/webhook"
 
 	"github.com/ucloud/redis-cluster-operator/pkg/utils"
 )
 
 var log = logf.Log.WithName("drc-resource")
-
-var _ webhook.Validator = &DistributedRedisCluster{}
 
 func (in *DistributedRedisCluster) ValidateCreate() error {
 	log := log.WithValues("namespace", in.Namespace, "name", in.Name)
@@ -28,11 +23,11 @@ func (in *DistributedRedisCluster) ValidateCreate() error {
 		return fmt.Errorf("the custom service is invalid: invalid value: %s, %s", in.Spec.ServiceName, strings.Join(errs, ","))
 	}
 
-	if in.Spec.Resources != nil {
-		if errs := validation.ValidateResourceRequirements(in.Spec.Resources, field.NewPath("resources")); len(errs) > 0 {
-			return errs.ToAggregate()
-		}
-	}
+	// if in.Spec.Resources != nil {
+	// 	if errs := validation.ValidateResourceRequirements(in.Spec.Resources, field.NewPath("resources")); len(errs) > 0 {
+	// 		return errs.ToAggregate()
+	// 	}
+	// }
 
 	return nil
 }
@@ -52,11 +47,11 @@ func (in *DistributedRedisCluster) ValidateUpdate(old runtime.Object) error {
 		return fmt.Errorf("the custom service is invalid: invalid value: %s, %s", in.Spec.ServiceName, strings.Join(errs, ","))
 	}
 
-	if in.Spec.Resources != nil {
-		if errs := validation.ValidateResourceRequirements(in.Spec.Resources, field.NewPath("resources")); len(errs) > 0 {
-			return errs.ToAggregate()
-		}
-	}
+	// if in.Spec.Resources != nil {
+	// 	if errs := validation.ValidateResourceRequirements(in.Spec.Resources, field.NewPath("resources")); len(errs) > 0 {
+	// 		return errs.ToAggregate()
+	// 	}
+	// }
 
 	if oldObj.Status.Status == "" {
 		return nil

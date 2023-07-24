@@ -12,6 +12,13 @@ GIT_SHA=$(shell git rev-parse --short HEAD)
 BIN_DIR=build/bin
 .PHONY: all build check clean test login build-e2e push push-e2e build-tools
 
+LOCALBIN ?= $(shell pwd)/bin
+$(LOCALBIN):
+	mkdir -p $(LOCALBIN)
+
+CONTROLLER_GEN ?= $(LOCALBIN)/controller-gen
+CONTROLLER_TOOLS_VERSION ?= v0.9.2
+
 all: check build
 
 build: test build-go build-image
@@ -54,3 +61,13 @@ check: check-format
 
 check-format:
 	@test -z "$$(gofmt -s -l . 2>&1 | grep -v -e vendor/ | tee /dev/stderr)"
+
+
+.PHONY: controller-gen
+controller-gen: $(CONTROLLER_GEN) ## Download controller-gen locally if necessary.
+$(CONTROLLER_GEN): $(LOCALBIN)
+	test -s $(LOCALBIN)/controller-gen || GOBIN=$(LOCALBIN) go install sigs.k8s.io/controller-tools/cmd/controller-gen@$(CONTROLLER_TOOLS_VERSION)
+
+# Generate manifests for CRDs
+manifests: controller-gen
+	$(CONTROLLER_GEN) crd paths="./pkg/apis/..." output:crd:artifacts:config=deploy/crds
