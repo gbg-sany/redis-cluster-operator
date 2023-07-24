@@ -17,12 +17,12 @@ jobs:
               uses: docker/login-action@v2
               with:
                   username: ${{ secrets.DOCKERHUB_USERNAME }}
-                  password: ${{ secrets.DOCKERHUB_PASS }}
+                  password: ${{ secrets.DOCKERHUB_PASSWORD }}
 
             - name: Build and push Docker image 
               uses: docker/build-push-action@v3
               with:
                   push: true
-                  tags: aboveos/redis-cluster-operator:${{ github.event.inputs.tags }}
+                  tags: bytetrade/redis-cluster-operator:${{ github.event.inputs.tags }}
                   file: Dockerfile
 
