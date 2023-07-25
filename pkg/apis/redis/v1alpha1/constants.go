@@ -5,6 +5,7 @@ type StorageType string
 const (
 	PersistentClaim StorageType = "persistent-claim"
 	Ephemeral       StorageType = "ephemeral"
+	HostPath        StorageType = "hostPath"
 )
 
 const (

@@ -219,9 +219,7 @@ func mergeRenameCmds(userCmds []string, systemRenameCmdMap map[string]string) []
 		i++
 	}
 	sort.Strings(renameCmdSlice)
-	for _, renameCmd := range renameCmdSlice {
-		cmds = append(cmds, renameCmd)
-	}
+	cmds = append(cmds, renameCmdSlice...)
 
 	return cmds
 }
@@ -513,6 +511,16 @@ func emptyVolume() *corev1.Volume {
 		},
 	}
 }
+
+func hostPathVolume(cluster *redisv1alpha1.DistributedRedisCluster) *corev1.Volume {
+	return &corev1.Volume{
+		Name: redisStorageVolumeName,
+		VolumeSource: corev1.VolumeSource{
+			HostPath: cluster.Spec.Storage.HostPath,
+		},
+	}
+}
+
 func redisDataVolume(cluster *redisv1alpha1.DistributedRedisCluster) *corev1.Volume {
 	// This will find the volumed desired by the user. If no volume defined
 	// an EmptyDir will be used by default
@@ -525,6 +533,8 @@ func redisDataVolume(cluster *redisv1alpha1.DistributedRedisCluster) *corev1.Vol
 		return emptyVolume()
 	case redisv1alpha1.PersistentClaim:
 		return nil
+	case redisv1alpha1.HostPath:
+		return hostPathVolume(cluster)
 	default:
 		return emptyVolume()
 	}
