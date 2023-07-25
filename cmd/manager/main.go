@@ -94,6 +94,7 @@ func main() {
 	mgr, err := ctrl.NewManager(cfg, ctrl.Options{
 		MetricsBindAddress: fmt.Sprintf("%s:%d", metricsHost, metricsPort),
 		LeaderElection:     true,
+		LeaderElectionID:   "redis-cluster-operator.bytetrade.io",
 	})
 	if err != nil {
 		log.Error(err, "")
