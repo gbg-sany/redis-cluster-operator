@@ -97,9 +97,9 @@ type BackupSourceSpec struct {
 
 // RedisStorage defines the structure used to store the Redis Data
 type RedisStorage struct {
-	Size        resource.Quantity            `json:"size"`
+	Size        resource.Quantity            `json:"size,omitempty"`
 	Type        StorageType                  `json:"type"`
-	Class       string                       `json:"class"`
+	Class       string                       `json:"class,omitempty"`
 	DeleteClaim bool                         `json:"deleteClaim,omitempty"`
 	HostPath    *corev1.HostPathVolumeSource `json:"hostPath,omitempty"`
 }

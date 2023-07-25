@@ -1801,8 +1801,6 @@ spec:
                   type:
                     type: string
                 required:
-                - class
-                - size
                 - type
                 type: object
               toleRations:
@@ -7196,8 +7194,6 @@ spec:
                               type:
                                 type: string
                             required:
-                            - class
-                            - size
                             - type
                             type: object
                           storageSecretName:
