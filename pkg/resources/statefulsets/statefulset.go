@@ -435,8 +435,9 @@ func customContainerEnv(env []corev1.EnvVar, customEnv []corev1.EnvVar) []corev1
 func volumeMounts() []corev1.VolumeMount {
 	return []corev1.VolumeMount{
 		{
-			Name:      redisStorageVolumeName,
-			MountPath: "/data",
+			Name:        redisStorageVolumeName,
+			MountPath:   "/data",
+			SubPathExpr: "$(POD_NAME)",
 		},
 		{
 			Name:      configMapVolumeName,
