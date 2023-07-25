@@ -5,14 +5,14 @@ import (
 	"path/filepath"
 
 	"github.com/go-logr/logr"
-	"k8s.io/api/core/v1"
+	v1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/resource"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 )
 
 const (
-	minMasterSize       = 3
+	minMasterSize       = 1
 	minClusterReplicas  = 1
 	defaultRedisImage   = "redis:5.0.4-alpine"
 	defaultMonitorImage = "oliver006/redis_exporter:latest"
@@ -94,12 +94,12 @@ func (in *DistributedRedisCluster) IsRestoreRestarting() bool {
 func defaultResource() *v1.ResourceRequirements {
 	return &v1.ResourceRequirements{
 		Requests: v1.ResourceList{
-			v1.ResourceCPU:    resource.MustParse("200m"),
-			v1.ResourceMemory: resource.MustParse("2Gi"),
+			v1.ResourceCPU:    resource.MustParse("20m"),
+			v1.ResourceMemory: resource.MustParse("100m"),
 		},
 		Limits: v1.ResourceList{
-			v1.ResourceCPU:    resource.MustParse("1000m"),
-			v1.ResourceMemory: resource.MustParse("4Gi"),
+			v1.ResourceCPU:    resource.MustParse("500m"),
+			v1.ResourceMemory: resource.MustParse("500m"),
 		},
 	}
 }
