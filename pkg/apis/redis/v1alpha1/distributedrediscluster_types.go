@@ -145,6 +145,7 @@ type RedisClusterNode struct {
 // +kubebuilder:printcolumn:name="service",type=string,JSONPath=`.spec.serviceName`
 // +kubebuilder:printcolumn:name="Age",type="date",JSONPath=".metadata.creationTimestamp"
 // +kubebuilder:object:root=true
+// +kubebuilder:subresource:status
 // +kubebuilder:resource:scope=Namespaced, shortName={drc}, categories={all}
 // DistributedRedisCluster is the Schema for the distributedredisclusters API
 type DistributedRedisCluster struct {

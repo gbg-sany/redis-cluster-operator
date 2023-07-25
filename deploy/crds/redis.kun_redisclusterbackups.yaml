@@ -455,7 +455,7 @@ spec:
                           medium EmptyDir would be the minimum value between the SizeLimit
                           specified here and the sum of memory limits of all containers
                           in a pod. The default is nil which means that the limit
-                          is undefined. More info: https://kubernetes.io/docs/concepts/storage/volumes#emptydir'
+                          is undefined. More info: http://kubernetes.io/docs/user-guide/volumes#emptydir'
                         pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
                         x-kubernetes-int-or-string: true
                     type: object
@@ -522,12 +522,9 @@ spec:
                                   provisioner or an external controller can support
                                   the specified data source, it will create a new
                                   volume based on the contents of the specified data
-                                  source. When the AnyVolumeDataSource feature gate
-                                  is enabled, dataSource contents will be copied to
-                                  dataSourceRef, and dataSourceRef contents will be
-                                  copied to dataSource when dataSourceRef.namespace
-                                  is not specified. If the namespace is specified,
-                                  then dataSourceRef will not be copied to dataSource.'
+                                  source. If the AnyVolumeDataSource feature gate
+                                  is enabled, this field will always have the same
+                                  contents as the DataSourceRef field.'
                                 properties:
                                   apiGroup:
                                     description: APIGroup is the group for the resource
@@ -552,33 +549,27 @@ spec:
                               dataSourceRef:
                                 description: 'dataSourceRef specifies the object from
                                   which to populate the volume with data, if a non-empty
-                                  volume is desired. This may be any object from a
-                                  non-empty API group (non core object) or a PersistentVolumeClaim
-                                  object. When this field is specified, volume binding
-                                  will only succeed if the type of the specified object
-                                  matches some installed volume populator or dynamic
-                                  provisioner. This field will replace the functionality
-                                  of the dataSource field and as such if both fields
-                                  are non-empty, they must have the same value. For
-                                  backwards compatibility, when namespace isn''t specified
-                                  in dataSourceRef, both fields (dataSource and dataSourceRef)
-                                  will be set to the same value automatically if one
-                                  of them is empty and the other is non-empty. When
-                                  namespace is specified in dataSourceRef, dataSource
-                                  isn''t set to the same value and must be empty.
-                                  There are three important differences between dataSource
-                                  and dataSourceRef: * While dataSource only allows
-                                  two specific types of objects, dataSourceRef allows
+                                  volume is desired. This may be any local object
+                                  from a non-empty API group (non core object) or
+                                  a PersistentVolumeClaim object. When this field
+                                  is specified, volume binding will only succeed if
+                                  the type of the specified object matches some installed
+                                  volume populator or dynamic provisioner. This field
+                                  will replace the functionality of the DataSource
+                                  field and as such if both fields are non-empty,
+                                  they must have the same value. For backwards compatibility,
+                                  both fields (DataSource and DataSourceRef) will
+                                  be set to the same value automatically if one of
+                                  them is empty and the other is non-empty. There
+                                  are two important differences between DataSource
+                                  and DataSourceRef: * While DataSource only allows
+                                  two specific types of objects, DataSourceRef allows
                                   any non-core object, as well as PersistentVolumeClaim
-                                  objects. * While dataSource ignores disallowed values
-                                  (dropping them), dataSourceRef preserves all values,
+                                  objects. * While DataSource ignores disallowed values
+                                  (dropping them), DataSourceRef preserves all values,
                                   and generates an error if a disallowed value is
-                                  specified. * While dataSource only allows local
-                                  objects, dataSourceRef allows objects in any namespaces.
-                                  (Beta) Using this field requires the AnyVolumeDataSource
-                                  feature gate to be enabled. (Alpha) Using the namespace
-                                  field of dataSourceRef requires the CrossNamespaceVolumeDataSource
-                                  feature gate to be enabled.'
+                                  specified. (Beta) Using this field requires the
+                                  AnyVolumeDataSource feature gate to be enabled.'
                                 properties:
                                   apiGroup:
                                     description: APIGroup is the group for the resource
@@ -595,21 +586,11 @@ spec:
                                     description: Name is the name of resource being
                                       referenced
                                     type: string
-                                  namespace:
-                                    description: Namespace is the namespace of resource
-                                      being referenced Note that when a namespace
-                                      is specified, a gateway.networking.k8s.io/ReferenceGrant
-                                      object is required in the referent namespace
-                                      to allow that namespace's owner to accept the
-                                      reference. See the ReferenceGrant documentation
-                                      for details. (Alpha) This field requires the
-                                      CrossNamespaceVolumeDataSource feature gate
-                                      to be enabled.
-                                    type: string
                                 required:
                                 - kind
                                 - name
                                 type: object
+                                x-kubernetes-map-type: atomic
                               resources:
                                 description: 'resources represents the minimum resources
                                   the volume should have. If RecoverVolumeExpansionFailure
@@ -618,30 +599,6 @@ spec:
                                   value but must still be higher than capacity recorded
                                   in the status field of the claim. More info: https://kubernetes.io/docs/concepts/storage/persistent-volumes#resources'
                                 properties:
-                                  claims:
-                                    description: "Claims lists the names of resources,
-                                      defined in spec.resourceClaims, that are used
-                                      by this container. \n This is an alpha field
-                                      and requires enabling the DynamicResourceAllocation
-                                      feature gate. \n This field is immutable. It
-                                      can only be set for containers."
-                                    items:
-                                      description: ResourceClaim references one entry
-                                        in PodSpec.ResourceClaims.
-                                      properties:
-                                        name:
-                                          description: Name must match the name of
-                                            one entry in pod.spec.resourceClaims of
-                                            the Pod where this field is used. It makes
-                                            that resource available inside a container.
-                                          type: string
-                                      required:
-                                      - name
-                                      type: object
-                                    type: array
-                                    x-kubernetes-list-map-keys:
-                                    - name
-                                    x-kubernetes-list-type: map
                                   limits:
                                     additionalProperties:
                                       anyOf:
@@ -663,8 +620,8 @@ spec:
                                       of compute resources required. If Requests is
                                       omitted for a container, it defaults to Limits
                                       if that is explicitly specified, otherwise to
-                                      an implementation-defined value. Requests cannot
-                                      exceed Limits. More info: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/'
+                                      an implementation-defined value. More info:
+                                      https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/'
                                     type: object
                                 type: object
                               selector:
@@ -2890,10 +2847,7 @@ spec:
                                           header to be used in HTTP probes
                                         properties:
                                           name:
-                                            description: The header field name. This
-                                              will be canonicalized upon output, so
-                                              case-variant names will be understood
-                                              as the same header.
+                                            description: The header field name
                                             type: string
                                           value:
                                             description: The header field value
@@ -2992,10 +2946,7 @@ spec:
                                           header to be used in HTTP probes
                                         properties:
                                           name:
-                                            description: The header field name. This
-                                              will be canonicalized upon output, so
-                                              case-variant names will be understood
-                                              as the same header.
+                                            description: The header field name
                                             type: string
                                           value:
                                             description: The header field value
@@ -3077,7 +3028,8 @@ spec:
                               type: integer
                             grpc:
                               description: GRPC specifies an action involving a GRPC
-                                port.
+                                port. This is a beta field and requires enabling GRPCContainerProbe
+                                feature gate.
                               properties:
                                 port:
                                   description: Port number of the gRPC service. Number
@@ -3109,9 +3061,7 @@ spec:
                                       to be used in HTTP probes
                                     properties:
                                       name:
-                                        description: The header field name. This will
-                                          be canonicalized upon output, so case-variant
-                                          names will be understood as the same header.
+                                        description: The header field name
                                         type: string
                                       value:
                                         description: The header field value
@@ -3286,7 +3236,8 @@ spec:
                               type: integer
                             grpc:
                               description: GRPC specifies an action involving a GRPC
-                                port.
+                                port. This is a beta field and requires enabling GRPCContainerProbe
+                                feature gate.
                               properties:
                                 port:
                                   description: Port number of the gRPC service. Number
@@ -3318,9 +3269,7 @@ spec:
                                       to be used in HTTP probes
                                     properties:
                                       name:
-                                        description: The header field name. This will
-                                          be canonicalized upon output, so case-variant
-                                          names will be understood as the same header.
+                                        description: The header field name
                                         type: string
                                       value:
                                         description: The header field value
@@ -3410,54 +3359,10 @@ spec:
                               format: int32
                               type: integer
                           type: object
-                        resizePolicy:
-                          description: Resources resize policy for the container.
-                          items:
-                            description: ContainerResizePolicy represents resource
-                              resize policy for the container.
-                            properties:
-                              resourceName:
-                                description: 'Name of the resource to which this resource
-                                  resize policy applies. Supported values: cpu, memory.'
-                                type: string
-                              restartPolicy:
-                                description: Restart policy to apply when specified
-                                  resource is resized. If not specified, it defaults
-                                  to NotRequired.
-                                type: string
-                            required:
-                            - resourceName
-                            - restartPolicy
-                            type: object
-                          type: array
-                          x-kubernetes-list-type: atomic
                         resources:
                           description: 'Compute Resources required by this container.
                             Cannot be updated. More info: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/'
                           properties:
-                            claims:
-                              description: "Claims lists the names of resources, defined
-                                in spec.resourceClaims, that are used by this container.
-                                \n This is an alpha field and requires enabling the
-                                DynamicResourceAllocation feature gate. \n This field
-                                is immutable. It can only be set for containers."
-                              items:
-                                description: ResourceClaim references one entry in
-                                  PodSpec.ResourceClaims.
-                                properties:
-                                  name:
-                                    description: Name must match the name of one entry
-                                      in pod.spec.resourceClaims of the Pod where
-                                      this field is used. It makes that resource available
-                                      inside a container.
-                                    type: string
-                                required:
-                                - name
-                                type: object
-                              type: array
-                              x-kubernetes-list-map-keys:
-                              - name
-                              x-kubernetes-list-type: map
                             limits:
                               additionalProperties:
                                 anyOf:
@@ -3479,7 +3384,7 @@ spec:
                                 of compute resources required. If Requests is omitted
                                 for a container, it defaults to Limits if that is
                                 explicitly specified, otherwise to an implementation-defined
-                                value. Requests cannot exceed Limits. More info: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/'
+                                value. More info: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/'
                               type: object
                           type: object
                         securityContext:
@@ -3696,7 +3601,8 @@ spec:
                               type: integer
                             grpc:
                               description: GRPC specifies an action involving a GRPC
-                                port.
+                                port. This is a beta field and requires enabling GRPCContainerProbe
+                                feature gate.
                               properties:
                                 port:
                                   description: Port number of the gRPC service. Number
@@ -3728,9 +3634,7 @@ spec:
                                       to be used in HTTP probes
                                     properties:
                                       name:
-                                        description: The header field name. This will
-                                          be canonicalized upon output, so case-variant
-                                          names will be understood as the same header.
+                                        description: The header field name
                                         type: string
                                       value:
                                         description: The header field value
@@ -3978,9 +3882,7 @@ spec:
                                     to be used in HTTP probes
                                   properties:
                                     name:
-                                      description: The header field name. This will
-                                        be canonicalized upon output, so case-variant
-                                        names will be understood as the same header.
+                                      description: The header field name
                                       type: string
                                     value:
                                       description: The header field value
@@ -4075,9 +3977,7 @@ spec:
                                     to be used in HTTP probes
                                   properties:
                                     name:
-                                      description: The header field name. This will
-                                        be canonicalized upon output, so case-variant
-                                        names will be understood as the same header.
+                                      description: The header field name
                                       type: string
                                     value:
                                       description: The header field value
@@ -4159,6 +4059,8 @@ spec:
                         type: integer
                       grpc:
                         description: GRPC specifies an action involving a GRPC port.
+                          This is a beta field and requires enabling GRPCContainerProbe
+                          feature gate.
                         properties:
                           port:
                             description: Port number of the gRPC service. Number must
@@ -4190,9 +4092,7 @@ spec:
                                 be used in HTTP probes
                               properties:
                                 name:
-                                  description: The header field name. This will be
-                                    canonicalized upon output, so case-variant names
-                                    will be understood as the same header.
+                                  description: The header field name
                                   type: string
                                 value:
                                   description: The header field value
@@ -4335,6 +4235,8 @@ spec:
                         type: integer
                       grpc:
                         description: GRPC specifies an action involving a GRPC port.
+                          This is a beta field and requires enabling GRPCContainerProbe
+                          feature gate.
                         properties:
                           port:
                             description: Port number of the gRPC service. Number must
@@ -4366,9 +4268,7 @@ spec:
                                 be used in HTTP probes
                               properties:
                                 name:
-                                  description: The header field name. This will be
-                                    canonicalized upon output, so case-variant names
-                                    will be understood as the same header.
+                                  description: The header field name
                                   type: string
                                 value:
                                   description: The header field value
@@ -4459,28 +4359,6 @@ spec:
                   resources:
                     description: Compute Resources required by the sidecar container.
                     properties:
-                      claims:
-                        description: "Claims lists the names of resources, defined
-                          in spec.resourceClaims, that are used by this container.
-                          \n This is an alpha field and requires enabling the DynamicResourceAllocation
-                          feature gate. \n This field is immutable. It can only be
-                          set for containers."
-                        items:
-                          description: ResourceClaim references one entry in PodSpec.ResourceClaims.
-                          properties:
-                            name:
-                              description: Name must match the name of one entry in
-                                pod.spec.resourceClaims of the Pod where this field
-                                is used. It makes that resource available inside a
-                                container.
-                              type: string
-                          required:
-                          - name
-                          type: object
-                        type: array
-                        x-kubernetes-list-map-keys:
-                        - name
-                        x-kubernetes-list-type: map
                       limits:
                         additionalProperties:
                           anyOf:
@@ -4501,8 +4379,7 @@ spec:
                         description: 'Requests describes the minimum amount of compute
                           resources required. If Requests is omitted for a container,
                           it defaults to Limits if that is explicitly specified, otherwise
-                          to an implementation-defined value. Requests cannot exceed
-                          Limits. More info: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/'
+                          to an implementation-defined value. More info: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/'
                         type: object
                     type: object
                   schedulerName:
@@ -4616,13 +4493,9 @@ spec:
                       supplementalGroups:
                         description: A list of groups applied to the first process
                           run in each container, in addition to the container's primary
-                          GID, the fsGroup (if specified), and group memberships defined
-                          in the container image for the uid of the container process.
-                          If unspecified, no additional groups are added to any container.
-                          Note that group memberships defined in the container image
-                          for the uid of the container process are still effective,
-                          even if they are not included in this list. Note that this
-                          field cannot be set when spec.os.name is windows.
+                          GID.  If unspecified, no groups will be added to any container.
+                          Note that this field cannot be set when spec.os.name is
+                          windows.
                         items:
                           format: int64
                           type: integer

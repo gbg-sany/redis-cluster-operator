@@ -187,11 +187,12 @@ func getRedisCommand(cluster *redisv1alpha1.DistributedRedisCluster, password *c
 			fmt.Sprintf("--masterauth '$(%s)'", redisv1alpha1.PasswordENV))
 	}
 
-	renameCmdMap := utils.BuildCommandReplaceMapping(config.RedisConf().GetRenameCommandsFile(), log)
-	mergedCmd := mergeRenameCmds(cluster.Spec.Command, renameCmdMap)
-
-	if len(mergedCmd) > 0 {
-		cmd = append(cmd, mergedCmd...)
+	if config.RedisConf().GetRenameCommandsFile() != "" {
+		renameCmdMap := utils.BuildCommandReplaceMapping(config.RedisConf().GetRenameCommandsFile(), log)
+		mergedCmd := mergeRenameCmds(cluster.Spec.Command, renameCmdMap)
+		if len(mergedCmd) > 0 {
+			cmd = append(cmd, mergedCmd...)
+		}
 	}
 
 	return cmd
