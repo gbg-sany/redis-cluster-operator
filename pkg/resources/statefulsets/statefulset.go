@@ -281,6 +281,14 @@ func redisServerContainer(cluster *redisv1alpha1.DistributedRedisCluster, passwo
 					},
 				},
 			},
+			{
+				Name: "POD_NAME",
+				ValueFrom: &corev1.EnvVarSource{
+					FieldRef: &corev1.ObjectFieldSelector{
+						FieldPath: "metadata.name",
+					},
+				},
+			},
 		},
 		Resources: *cluster.Spec.Resources,
 		// TODO store redis data when pod stop
