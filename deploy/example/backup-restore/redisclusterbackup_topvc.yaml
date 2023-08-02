@@ -15,14 +15,16 @@ spec:
 apiVersion: redis.kun/v1alpha1
 kind: RedisClusterBackup
 metadata:
-  name: example-redisclusterbackup
+  name: rediscluster-backup
+  namespace: user-system-{{ .Values.bfl.username }}
   annotations:
     redis.kun/scope: cluster-scoped
 spec:
-  image: hub.ucloudadmin.com/uaek/redis-tools:5.0.4
+  image: bytetrade/redis-backup-tools:redis-6.2.13
   # on same namespace
-  redisClusterName: test
+  redisClusterName: redis-cluster
   local:
     mountPath: /back
-    persistentVolumeClaim:
-      claimName: test-backup
+    hostPath:
+      type: DirectoryOrCreate
+      path: {{ .Values.userspace.dbdata }}/redisbackup
