@@ -147,8 +147,7 @@ case "$op" in
     echo "Recovery successful"
     ;;
   *)
-    (10)
-    echo $"Unknown op!"
+    show_help
     RETVAL=1
     ;;
 esac
