@@ -1,3 +1,5 @@
+#!/bin/bash
+
 # Copyright 2023 bytetrade
 # 
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -12,7 +14,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-#!/bin/bash
 set -eou pipefail
 
 # ref: https://github.com/kubedb/mysql/blob/master/hack/docker/mysql-tools/5.7.25/mysql-tools.sh
