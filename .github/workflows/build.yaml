@@ -1,0 +1,15 @@
+name: Build the main branch
+on: 
+  push:
+    branches:
+      - "main"
+jobs:
+  build0-main:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-go@v3
+        with:
+          go-version: '1.19'
+      - run: |
+          docker build -t redis-cluster-operator .
