@@ -211,7 +211,7 @@ func (r *realEnsureResource) EnsureRedisConfigMap(cluster *redisv1alpha1.Distrib
 		}
 	}
 
-	if cluster.IsRestoreFromBackup() {
+	if cluster.IsRestoreFromBackup() && cluster.Status.Restore.Backup != nil {
 		restoreCmName := configmaps.RestoreConfigMapName(cluster.Name)
 		restoreCm, err := r.configMapClient.GetConfigMap(cluster.Namespace, restoreCmName)
 		if err != nil {
@@ -236,6 +236,9 @@ func (r *realEnsureResource) EnsureRedisRCloneSecret(cluster *redisv1alpha1.Dist
 		return nil
 	}
 	backup := cluster.Status.Restore.Backup
+	if backup == nil {
+		return nil
+	}
 	secret, err := osm.NewRcloneSecret(r.client, backup.RCloneSecretName(), cluster.Namespace, backup.Spec.Backend, redisv1alpha1.DefaultOwnerReferences(cluster))
 	if err != nil {
 		return err

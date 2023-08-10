@@ -120,7 +120,7 @@ func (r *ReconcileDistributedRedisCluster) validateAndSetDefault(cluster *redisv
 }
 
 func dbLoadedFromDiskWhenRestore(cluster *redisv1alpha1.DistributedRedisCluster, reqLogger logr.Logger) {
-	if cluster.IsRestoreFromBackup() && !cluster.IsRestored() {
+	if cluster.IsRestoreFromBackup() && cluster.Status.Restore.Backup != nil && !cluster.IsRestored() {
 		if cluster.Spec.Config != nil {
 			reqLogger.Info("force appendonly = no when do restore")
 			cluster.Spec.Config["appendonly"] = "no"
