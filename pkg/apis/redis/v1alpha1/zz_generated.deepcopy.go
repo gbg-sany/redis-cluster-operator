@@ -6,8 +6,6 @@
 package v1alpha1
 
 import (
-	"runtime/debug"
-
 	v1 "k8s.io/api/core/v1"
 	runtime "k8s.io/apimachinery/pkg/runtime"
 )
