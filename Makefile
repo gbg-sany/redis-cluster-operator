@@ -70,4 +70,4 @@ $(CONTROLLER_GEN): $(LOCALBIN)
 
 # Generate manifests for CRDs
 manifests: controller-gen
-	$(CONTROLLER_GEN) crd paths="./pkg/apis/..." output:crd:artifacts:config=deploy/crds
+	$(CONTROLLER_GEN) crd paths="./pkg/apis/..." crd:generateEmbeddedObjectMeta=true output:crd:artifacts:config=deploy/crds
