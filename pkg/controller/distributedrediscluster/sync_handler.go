@@ -141,8 +141,10 @@ func (r *ReconcileDistributedRedisCluster) initRestore(cluster *redisv1alpha1.Di
 			reqLogger.Error(nil, "backup is still running")
 			return update, fmt.Errorf("backup is still running")
 		}
+		reqLogger.Info("restore backup", "name", backup.Name, backup.Namespace)
 		cluster.Status.Restore.Backup = backup
 		cluster.Status.Restore.Phase = redisv1alpha1.RestorePhaseRunning
+		reqLogger.Info("update restore backup status", "name", cluster.Status.Restore.Backup.Name, cluster.Status.Restore.Backup.Namespace)
 		if err := r.crController.UpdateCRStatus(cluster); err != nil {
 			return update, err
 		}
