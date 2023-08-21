@@ -120,7 +120,7 @@ func (r *ReconcileDistributedRedisCluster) validateAndSetDefault(cluster *redisv
 }
 
 func dbLoadedFromDiskWhenRestore(cluster *redisv1alpha1.DistributedRedisCluster, reqLogger logr.Logger) {
-	if cluster.IsRestoreFromBackup() && cluster.Status.Restore.Backup != nil && !cluster.IsRestored() {
+	if cluster.IsRestoreFromBackup() && !cluster.IsRestored() {
 		if cluster.Spec.Config != nil {
 			reqLogger.Info("force appendonly = no when do restore")
 			cluster.Spec.Config["appendonly"] = "no"
@@ -135,18 +135,13 @@ func (r *ReconcileDistributedRedisCluster) initRestore(cluster *redisv1alpha1.Di
 		backup, err := r.crController.GetRedisClusterBackup(initSpec.BackupSource.Namespace, initSpec.BackupSource.Name)
 		if err != nil {
 			reqLogger.Error(err, "GetRedisClusterBackup")
-			// ignore error
-			return update, nil
+			return update, err
 		}
 		if backup.Status.Phase != redisv1alpha1.BackupPhaseSucceeded {
 			reqLogger.Error(nil, "backup is still running")
 			return update, fmt.Errorf("backup is still running")
 		}
 		cluster.Status.Restore.Backup = backup
-		if cluster.Status.Restore.Backup.ObjectMeta.Name == "" {
-			cluster.Status.Restore.Backup.ObjectMeta.Name = initSpec.BackupSource.Name
-			cluster.Status.Restore.Backup.ObjectMeta.Namespace = initSpec.BackupSource.Namespace
-		}
 		cluster.Status.Restore.Phase = redisv1alpha1.RestorePhaseRunning
 		if err := r.crController.UpdateCRStatus(cluster); err != nil {
 			return update, err
