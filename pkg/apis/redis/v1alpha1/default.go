@@ -158,6 +158,6 @@ func (in *RedisClusterBackup) JobName() string {
 }
 
 func (in *RedisClusterBackup) IsRefLocalPVC() bool {
-	return in.Spec.Local != nil &&
-		(in.Spec.Local.PersistentVolumeClaim != nil || in.Spec.Local.HostPath != nil)
+	return in.Spec.Backend.Local != nil &&
+		(in.Spec.Backend.Local.PersistentVolumeClaim != nil || in.Spec.Backend.Local.HostPath != nil)
 }
