@@ -1,8 +1,9 @@
+ARG PROJECT_NAME=redis-cluster-operator
+#==============================================================================
 FROM golang:1.19 as builder
 
-ARG PROJECT_NAME=redis-cluster-operator
+ARG PROJECT_NAME
 ARG BUILD_PATH=./cmd/manager/main.go
-
 
 WORKDIR /src
 
@@ -15,10 +16,11 @@ RUN GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build -o output/${PROJECT_NAME} $BU
 
 # =============================================================================
 FROM gcr.io/distroless/static:debug
-WORKDIR /
-COPY --from=builder /src/output/redis-cluster-operator .
 
-ARG PROJECT_NAME=redis-cluster-operator
+ARG PROJECT_NAME
+
+WORKDIR /
+COPY --from=builder /src/output/${PROJECT_NAME} .
 
 ENTRYPOINT ["/redis-cluster-operator"]
 USER 65532:65532

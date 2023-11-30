@@ -37,6 +37,18 @@ rules:
       - watch
       - delete
   - apiGroups:
+      - "coordination.k8s.io"
+    resources:
+      - leases
+    verbs:
+      - create
+      - get
+      - list
+      - patch
+      - update
+      - watch
+      - delete
+  - apiGroups:
       - ""
     resources:
       - namespaces

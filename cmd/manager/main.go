@@ -25,6 +25,7 @@ import (
 
 	"github.com/ucloud/redis-cluster-operator/pkg/apis"
 	redisv1alpha1 "github.com/ucloud/redis-cluster-operator/pkg/apis/redis/v1alpha1"
+	rccfg "github.com/ucloud/redis-cluster-operator/pkg/config"
 	"github.com/ucloud/redis-cluster-operator/pkg/controller"
 	"github.com/ucloud/redis-cluster-operator/pkg/controller/distributedrediscluster"
 	"github.com/ucloud/redis-cluster-operator/pkg/controller/redisclusterbackup"
@@ -65,7 +66,7 @@ func main() {
 
 	opts.BindFlags(flag.CommandLine)
 
-	pflag.CommandLine.AddGoFlagSet(flag.CommandLine)
+	rccfg.RedisConf().AddFlags(pflag.CommandLine)
 	pflag.Parse()
 
 	// Use a zap logr.Logger implementation. If none of the zap

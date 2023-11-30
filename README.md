@@ -245,3 +245,10 @@ see [ValidatingWebhook](/hack/webhook/README.md)
 ## End to end tests
 
 see [e2e](/test/e2e/README.md)
+
+## Fork
+
+- any change to CRD type (pkg/apis/redis/v1alpha1) then need to run `make generate` and `make manifests` to auto-generate deepcopy code and CRD yamls respectively.
+
+### TODO
+1. Should remove CRD as well when uninstall operator? Currently can manually delete it using `kubectl delete crd distributedredisclusters.redis.kun` and `kubectl delete crd redisclusterbackups.redis.kun`

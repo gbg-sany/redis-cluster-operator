@@ -95,11 +95,7 @@ func defaultResource() *v1.ResourceRequirements {
 	return &v1.ResourceRequirements{
 		Requests: v1.ResourceList{
 			v1.ResourceCPU:    resource.MustParse("20m"),
-			v1.ResourceMemory: resource.MustParse("100m"),
-		},
-		Limits: v1.ResourceList{
-			v1.ResourceCPU:    resource.MustParse("500m"),
-			v1.ResourceMemory: resource.MustParse("500m"),
+			v1.ResourceMemory: resource.MustParse("100Mi"),
 		},
 	}
 }

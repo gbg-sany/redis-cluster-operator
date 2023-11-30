@@ -1,13 +1,10 @@
-FROM registry.access.redhat.com/ubi7/ubi-minimal:latest
+FROM centos:7
 
 ENV OPERATOR=/usr/local/bin/redis-cluster-operator \
     USER_UID=1001 \
     USER_NAME=redis-cluster-operator
 
-# install operator binary
-COPY build/_output/bin/redis-cluster-operator ${OPERATOR}
-
-COPY build/bin /usr/local/bin
+COPY bin /usr/local/bin
 RUN  /usr/local/bin/user_setup
 
 ENTRYPOINT ["/usr/local/bin/entrypoint"]

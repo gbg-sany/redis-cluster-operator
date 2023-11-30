@@ -1,12 +1,13 @@
 package v1alpha1
 
 import (
-	"k8s.io/apimachinery/pkg/runtime"
 	"testing"
+
+	"k8s.io/apimachinery/pkg/runtime"
 
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/resource"
-	"k8s.io/apimachinery/pkg/apis/meta/v1"
+	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 func TestDistributedRedisCluster_ValidateCreate(t *testing.T) {
@@ -33,7 +34,7 @@ func TestDistributedRedisCluster_ValidateCreate(t *testing.T) {
 					Config:          nil,
 					Affinity:        nil,
 					NodeSelector:    nil,
-					ToleRations:     nil,
+					Tolerations:     nil,
 					SecurityContext: nil,
 					Annotations:     nil,
 					Storage:         nil,
