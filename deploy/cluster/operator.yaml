@@ -35,6 +35,13 @@ spec:
           volumeMounts:
             - name: redisconf
               mountPath: /etc/redisconf
+          resources:
+            limits:
+              cpu: 200m
+              memory: 256Mi
+            requests:
+              cpu: 100m
+              memory: 100Mi
       volumes:
         - name: redisconf
           configMap:

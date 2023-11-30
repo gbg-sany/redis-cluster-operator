@@ -23,16 +23,19 @@ all: check build
 
 build: test build-go build-image
 
-build-go:
-	GO111MODULE=on CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build \
+build_go_amd64: ARCH=amd64
+build_go_arm64: ARCH=arm64
+build_go build_go_amd64 build_go_arm64:
+	GO111MODULE=on CGO_ENABLED=0 GOOS=linux GOARCH=$(ARCH) go build \
 	-ldflags "-X github.com/$(REPO)/version.Version=$(VERSION) -X github.com/$(REPO)/version.GitSHA=$(GIT_SHA)" \
-	-o $(BIN_DIR)/$(PROJECT_NAME)-linux-amd64 cmd/manager/main.go
-	GO111MODULE=on CGO_ENABLED=0 GOOS=linux go build \
-	-ldflags "-X github.com/$(REPO)/version.Version=$(VERSION) -X github.com/$(REPO)/version.GitSHA=$(GIT_SHA)" \
-	-o $(BIN_DIR)/$(PROJECT_NAME) cmd/manager/main.go
+	-o $(BIN_DIR)/$(PROJECT_NAME)-linux-$(ARCH) cmd/manager/main.go
 
-build-image:
-	docker build --build-arg VERSION=$(VERSION) --build-arg GIT_SHA=$(GIT_SHA) -t $(ALTREPO):$(VERSION) .
+build-go: build_go_amd64 build_go_arm64
+
+build-image: ARCH=amd64
+build-arm64-image: ARCH=arm64
+build-image build-arm64-image:
+	docker build --platform=linux/$(ARCH) --build-arg VERSION=$(VERSION) --build-arg GIT_SHA=$(GIT_SHA) --build-arg ARCH=$(ARCH) -t $(ALTREPO):$(VERSION) .
 	docker tag $(ALTREPO):$(VERSION) $(ALTREPO):latest
 
 build-e2e:
@@ -76,5 +79,7 @@ generate: controller-gen ## Generate code containing DeepCopy, DeepCopyInto, and
 manifests: controller-gen
 	$(CONTROLLER_GEN) crd paths="./pkg/apis/..." crd:generateEmbeddedObjectMeta=true output:crd:artifacts:config=deploy/crds,config=charts/$(PROJECT_NAME)/crds
 
-build-docker-linux-arm64: build-go
-	docker build --platform=linux/arm64 build -t $(ALTREPO):latest
+compile-build-img: ARCH=amd64
+compile-build-arm64-img: ARCH=arm64
+compile-build-img compile-build-arm64-img: build_go
+	docker build --platform=linux/$(ARCH) --build-arg ARCH=$(ARCH) build -t $(ALTREPO):latest

@@ -1,11 +1,16 @@
 FROM centos:7
 
-ENV OPERATOR=/usr/local/bin/redis-cluster-operator \
-    USER_UID=1001 \
-    USER_NAME=redis-cluster-operator
+ARG ARCH=amd64
+ARG LOCALBIN=/usr/local/bin
+ARG PROJECT_NAME=redis-cluster-operator
 
-COPY bin /usr/local/bin
-RUN  /usr/local/bin/user_setup
+ENV OPERATOR=${LOCALBIN}/${PROJECT_NAME} \
+    USER_UID=1001 \
+    USER_NAME=${PROJECT_NAME}
+
+COPY bin ${LOCALBIN}
+RUN mv ${OPERATOR}-linux-${ARCH} ${OPERATOR}
+RUN ${LOCALBIN}/user_setup
 
 ENTRYPOINT ["/usr/local/bin/entrypoint"]
 

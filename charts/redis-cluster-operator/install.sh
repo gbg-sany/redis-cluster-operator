@@ -1,1 +1,1 @@
-helm install redis-cluster-operator . -n redis-cluster-operator --create-namespace --set operator.imagePullPolicy="Never"
+helm install redis-cluster-operator . -n redis-cluster-operator --create-namespace
